@@ -12,6 +12,7 @@ import numpy as np
 import pickle
 import os
 import random
+from collections import defaultdict
 
 import gymnasium as gym
 
@@ -71,10 +72,7 @@ def parse_file(file):
 
 def get_scores(rootdir, question):
 
-    scores = {}
-
-    for env in ENV_NAMES:
-        scores[env] = 0
+    scores = defaultdict(float)
 
     for root, dirs, filelist in os.walk(rootdir):
         # Skip hidden or system folders like __MACOSX

@@ -6,6 +6,7 @@ Hyperparameters for the experiment are defined in main()
 import os
 import time
 import argparse
+from typing import Dict, Any
 
 
 from xcs224r.infrastructure.bc_trainer import BCTrainer
@@ -14,7 +15,7 @@ from xcs224r.policies.loaded_gaussian_policy import LoadedGaussianPolicy
 from xcs224r.infrastructure.utils import MJ_ENV_KWARGS, MJ_ENV_NAMES
 
 
-def run_bc(params):
+def run_bc(params: Dict[str, Any]) -> None:
     """
     Runs behavior cloning with the specified parameters
 
@@ -65,7 +66,7 @@ def run_bc(params):
     )
 
 
-def main():
+def main() -> None:
     """
     Parses arguments, creates logger, and runs behavior cloning
     """
