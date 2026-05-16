@@ -8,6 +8,7 @@ Functions to edit:
 """
 import numpy as np
 import time
+from typing import Any, Tuple, List, Dict
 
 ############################################
 ############################################
@@ -16,7 +17,7 @@ MJ_ENV_NAMES = ["Ant-v4", "Walker2d-v4", "HalfCheetah-v4", "Hopper-v4"]
 MJ_ENV_KWARGS = {name: {"render_mode": "rgb_array"} for name in MJ_ENV_NAMES}
 MJ_ENV_KWARGS["Ant-v4"]["use_contact_forces"] = True
 
-def sample_trajectory(env, policy, max_path_length, render=False):
+def sample_trajectory(env: Any, policy: Any, max_path_length: int, render: bool=False) -> dict:
     """
     Rolls out a policy and generates a trajectories
 
@@ -77,7 +78,7 @@ def sample_trajectory(env, policy, max_path_length, render=False):
 
     return Path(obs, image_obs, acs, rewards, next_obs, terminals)
 
-def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, render=False):
+def sample_trajectories(env: Any, policy: Any, min_timesteps_per_batch: int, max_path_length: int, render: bool=False) -> Tuple[list, int]:
     """
         Collect rollouts until we have collected `min_timesteps_per_batch` steps.
 
@@ -96,7 +97,7 @@ def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, r
 
     return paths, timesteps_this_batch
 
-def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False):
+def sample_n_trajectories(env: Any, policy: Any, ntraj: int, max_path_length: int, render: bool=False) -> list:
     """
         Collect `ntraj` rollouts.
 
@@ -108,10 +109,11 @@ def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False):
     # *** START CODE HERE ***
     # *** END CODE HERE ***
 
+    return paths
 ############################################
 ############################################
 
-def Path(obs, image_obs, acs, rewards, next_obs, terminals):
+def Path(obs: list, image_obs: list, acs: list, rewards: list, next_obs: list, terminals: list) -> dict:
     """
         Take information (separate arrays) from a single rollout
         and return it in a single dictionary
@@ -126,7 +128,7 @@ def Path(obs, image_obs, acs, rewards, next_obs, terminals):
             "terminal": np.array(terminals, dtype=np.float32)}
 
 
-def convert_listofrollouts(paths):
+def convert_listofrollouts(paths: list) -> tuple:
     """
         Take a list of rollout dictionaries and return separate arrays,
         where each array is a concatenation of that array from across the rollouts
@@ -142,5 +144,5 @@ def convert_listofrollouts(paths):
 ############################################
 ############################################
 
-def get_pathlength(path):
+def get_pathlength(path: dict) -> int:
     return len(path["reward"])

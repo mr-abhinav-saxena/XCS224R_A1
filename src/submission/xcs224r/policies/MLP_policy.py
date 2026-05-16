@@ -45,15 +45,15 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         Trains the policy with a supervised learning objective
     """
     def __init__(self,
-                 ac_dim,
-                 ob_dim,
-                 n_layers,
-                 size,
-                 learning_rate=1e-4,
-                 training=True,
-                 nn_baseline=False,
-                 **kwargs
-                 ):
+                 ac_dim: int,
+                 ob_dim: int,
+                 n_layers: int,
+                 size: int,
+                 learning_rate: float=1e-4,
+                 training: bool=True,
+                 nn_baseline: bool=False,
+                 **kwargs: Any
+                 ) -> None:
         super().__init__(**kwargs)
 
         # Initialize variables for environment (action/observation dimension, number of layers, etc.)
@@ -85,7 +85,7 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     ##################################
 
-    def save(self, filepath):
+    def save(self, filepath: str) -> None:
         """
         :param filepath: path to save MLP
         """
@@ -135,7 +135,7 @@ class MLPPolicySL(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # *** START CODE HERE ***
         # *** END CODE HERE ***
 
-    def update(self, observations, actions):
+    def update(self, observations: np.ndarray, actions: np.ndarray) -> dict:
         """
         Updates/trains the policy
 

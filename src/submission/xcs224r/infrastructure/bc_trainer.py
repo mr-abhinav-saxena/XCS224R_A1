@@ -22,6 +22,7 @@ import numpy as np
 from . import pytorch_util as ptu
 from .logger import Logger
 from . import utils
+from typing import Any, Dict, List, Tuple, Optional
 
 # The number of rollouts to save to videos in PyTorch
 MAX_NVIDEO = 2
@@ -52,7 +53,7 @@ class BCTrainer:
         Relabels trajectories with new actions for DAgger
     """
 
-    def __init__(self, params):
+    def __init__(self, params: dict) -> None:
 
         #############
         ## INIT
@@ -113,9 +114,9 @@ class BCTrainer:
         agent_class = self.params['agent_class']
         self.agent = agent_class(self.env, self.params['agent_params'])
 
-    def run_training_loop(self, n_iter, collect_policy, eval_policy,
-                        initial_expertdata=None, relabel_with_expert=False,
-                        start_relabel_with_expert=1, expert_policy=None):
+    def run_training_loop(self, n_iter: int, collect_policy: Any, eval_policy: Any,
+                        initial_expertdata: Optional[str]=None, relabel_with_expert: bool=False,
+                        start_relabel_with_expert: int=1, expert_policy: Any=None) -> None:
         """
         :param n_iter:  number of (dagger) iterations
         :param collect_policy:
@@ -183,10 +184,10 @@ class BCTrainer:
 
     def collect_training_trajectories(
             self,
-            itr,
-            load_initial_expertdata,
-            collect_policy
-    ):
+            itr: int,
+            load_initial_expertdata: Any,
+            collect_policy: Any
+    ) -> Tuple[list, int, Optional[list]]:
         """
         :param itr:
         :param load_initial_expertdata: path to expert data pkl file
@@ -215,14 +216,14 @@ class BCTrainer:
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
         # note: here, we collect MAX_NVIDEO rollouts, each of length MAX_VIDEO_LEN
         train_video_paths = None
-        if self.log_video:
+        if self.log_video and not(itr == 0 and load_initial_expertdata):
             print('\nCollecting train rollouts to be used for saving videos...')
             train_video_paths = utils.sample_n_trajectories(self.env,
                 collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True)
 
         return paths, envsteps_this_batch, train_video_paths
 
-    def train_agent(self):
+    def train_agent(self) -> list:
         """
         Samples a batch of trajectories and updates the agent with the batch
         """
@@ -249,7 +250,7 @@ class BCTrainer:
             # *** END CODE HERE ***
         return all_logs
 
-    def do_relabel_with_expert(self, expert_policy, paths):
+    def do_relabel_with_expert(self, expert_policy: Any, paths: list) -> list:
         """
         Relabels collected trajectories with an expert policy
 
@@ -271,7 +272,7 @@ class BCTrainer:
     ####################################
     ####################################
 
-    def perform_logging(self, itr, paths, eval_policy, train_video_paths, training_logs):
+    def perform_logging(self, itr: int, paths: list, eval_policy: Any, train_video_paths: Optional[list], training_logs: list) -> None:
         """
         Logs training trajectories and evals the provided policy to log
         evaluation trajectories and videos

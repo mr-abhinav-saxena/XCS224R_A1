@@ -5,6 +5,7 @@ Functions to edit:
     sample_random_data: line 103
 """
 from .utils import *
+from typing import Tuple, List
 
 
 class ReplayBuffer():
@@ -35,7 +36,7 @@ class ReplayBuffer():
     sample_recent_data:
         Selects the most recent batch of data
     """
-    def __init__(self, max_size=1000000):
+    def __init__(self, max_size: int=1000000) -> None:
 
         self.max_size = max_size
 
@@ -49,13 +50,13 @@ class ReplayBuffer():
         self.next_obs = None
         self.terminals = None
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self.obs:
             return self.obs.shape[0]
         else:
             return 0
 
-    def add_rollouts(self, paths, concat_rew=True):
+    def add_rollouts(self, paths: list, concat_rew: bool=True) -> None:
         """
         Adds paths into the buffer and processes them into separate components
 
@@ -100,7 +101,7 @@ class ReplayBuffer():
     ########################################
     ########################################
 
-    def sample_random_data(self, batch_size):
+    def sample_random_data(self, batch_size: int) -> tuple:
         """
         Samples a batch of random transitions
 
@@ -120,7 +121,7 @@ class ReplayBuffer():
                 == self.terminals.shape[0]
         )
 
-        ## TODO return batch_size number of random entries\
+        ## TODO return the first batch_size number of random entries\
         ## from each of the 5 component arrays above
         ## HINT 1: use np.random.permutation to sample random indices
         ## HINT 2: return corresponding data points from each array
@@ -131,7 +132,7 @@ class ReplayBuffer():
         # *** START CODE HERE ***
         # *** END CODE HERE ***
 
-    def sample_recent_data(self, batch_size=1):
+    def sample_recent_data(self, batch_size: int=1) -> tuple:
         """
         Samples a batch of the most recent transitions transitions
 

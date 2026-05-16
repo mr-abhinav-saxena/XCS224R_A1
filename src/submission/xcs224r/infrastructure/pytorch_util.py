@@ -6,7 +6,8 @@ Functions to edit:
 '''
 
 
-from typing import Union
+from typing import Union, Any
+import numpy as np
 
 import torch
 from torch import nn
@@ -88,7 +89,7 @@ def build_mlp(
     return mlp
 
 
-def init_gpu(use_gpu=True, gpu_id=0):
+def init_gpu(use_gpu: bool=True, gpu_id: int=0) -> None:
     global device
     if torch.cuda.is_available() and use_gpu:
         device = torch.device("cuda:" + str(gpu_id))
@@ -101,13 +102,13 @@ def init_gpu(use_gpu=True, gpu_id=0):
         print("GPU not detected. Defaulting to CPU.")
 
 
-def set_device(gpu_id):
+def set_device(gpu_id: int) -> None:
     torch.cuda.set_device(gpu_id)
 
 
-def from_numpy(*args, **kwargs):
+def from_numpy(*args: Any, **kwargs: Any) -> torch.Tensor:
     return torch.from_numpy(*args, **kwargs).float().to(device)
 
 
-def to_numpy(tensor):
+def to_numpy(tensor: torch.Tensor) -> np.ndarray:
     return tensor.to('cpu').detach().numpy()

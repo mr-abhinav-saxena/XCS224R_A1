@@ -8,8 +8,9 @@ from .base_policy import BasePolicy
 from torch import nn
 import torch
 import pickle
+from typing import Any, Tuple, Optional
 
-def create_linear_layer(W, b) -> nn.Linear:
+def create_linear_layer(W: np.ndarray, b: np.ndarray) -> nn.Linear:
     out_features, in_features = W.shape
     linear_layer = nn.Linear(
         in_features,
@@ -20,7 +21,7 @@ def create_linear_layer(W, b) -> nn.Linear:
     return linear_layer
 
 
-def read_layer(l):
+def read_layer(l: dict) -> Tuple[np.ndarray, np.ndarray]:
     assert list(l.keys()) == ['AffineLayer']
     assert sorted(l['AffineLayer'].keys()) == ['W', 'b']
     return l['AffineLayer']['W'].astype(np.float32), l['AffineLayer'][
@@ -28,7 +29,7 @@ def read_layer(l):
 
 
 class LoadedGaussianPolicy(BasePolicy, nn.Module):
-    def __init__(self, filename, **kwargs):
+    def __init__(self, filename: str, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
         with open(filename, 'rb') as f:
@@ -78,7 +79,7 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
         W, b = read_layer(self.policy_params['out'])
         self.output_layer = create_linear_layer(W, b)
 
-    def forward(self, obs):
+    def forward(self, obs: torch.Tensor) -> torch.Tensor:
         normed_obs = (obs - self.obs_norm_mean) / (self.obs_norm_std + 1e-6)
         h = normed_obs
         for layer in self.hidden_layers:
@@ -88,13 +89,13 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
 
     ##################################
 
-    def update(self, obs_no, acs_na, adv_n=None, acs_labels_na=None):
+    def update(self, obs_no: np.ndarray, acs_na: np.ndarray, adv_n: Optional[np.ndarray] = None, acs_labels_na: Optional[np.ndarray] = None) -> None:
         raise NotImplementedError("""
             This policy class simply loads in a particular type of policy and
             queries it. Do not try to train it.
         """)
 
-    def get_action(self, obs):
+    def get_action(self, obs: np.ndarray) -> np.ndarray:
         if len(obs.shape) > 1:
             observation = obs
         else:
@@ -103,5 +104,5 @@ class LoadedGaussianPolicy(BasePolicy, nn.Module):
         action = self(observation)
         return ptu.to_numpy(action)
 
-    def save(self, filepath):
+    def save(self, filepath: str) -> None:
         torch.save(self.state_dict(), filepath)
