@@ -73,7 +73,7 @@ class ReplayBuffer():
             convert_listofrollouts(paths))
 
         if self.obs is None:
-            self.obs = observations[-self.max_size:]
+            self.obs = observations[-self.max_size:] # If the number of new observations exceeds max_size, only keep the most recent max_size number of observations
             self.acs = actions[-self.max_size:]
             self.rews = concatenated_rewards[-self.max_size:]
             self.next_obs = next_observations[-self.max_size:]
@@ -130,6 +130,24 @@ class ReplayBuffer():
         ## Note that rews, next_obs, and terminals are not used for BC
 
         # *** START CODE HERE ***
+        # 1. Determine the total transitions stored in the buffer (e.g. `self.obs.shape[0]`).
+        # 2. Obtain a random sequence of indices using `np.random.permutation(total_entries)`.
+        # 3. Slice the permuted array to take the first `batch_size` indices.
+        # 4. Use these sliced random indices to retrieve corresponding entries from:
+        #    `self.obs`, `self.acs`, `self.rews`, `self.next_obs`, and `self.terminals`.
+
+        total_entries = self.obs.shape[0]
+        random_indices = np.random.permutation(total_entries)[:batch_size]
+
+        sample = (
+            self.obs[random_indices],
+            self.acs[random_indices],
+            self.rews[random_indices],
+            self.next_obs[random_indices],
+            self.terminals[random_indices],
+        )
+
+        return sample
         # *** END CODE HERE ***
 
     def sample_recent_data(self, batch_size: int=1) -> tuple:

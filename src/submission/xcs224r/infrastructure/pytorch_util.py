@@ -84,6 +84,31 @@ def build_mlp(
     mlp = None
 
     # *** START CODE HERE ***
+    # 1. Initialize an empty list (e.g. `layers = []`) to store the modules of the network.
+    # 2. Loop `n_layers` times to append standard hidden layers:
+    #    - In the first iteration, the layer maps from `input_size` to `size`.
+    #    - In subsequent iterations, layers map from `size` to `size`.
+    #    - After appending each Linear module, append the `activation` function.
+    # 3. After the loop, append the final Linear output layer mapping from the last `size` to `output_size`.
+    # 4. Append the `output_activation` module.
+    # 5. Pack the modules into nn.Sequential: `mlp = nn.Sequential(*layers)`.
+    # 6. Ensure the network is placed on the current device by invoking `mlp.to(device)`.
+
+    modules = []
+    # Add the input layer and activation
+    modules.append(nn.Linear(input_size, size))
+    modules.append(activation)
+    
+    # Add the hidden layers and activations
+    for i in range(n_layers - 1):
+        modules.append(nn.Linear(size, size))
+        modules.append(activation)
+    
+    # Add the output layer and activation
+    modules.append(nn.Linear(size, output_size))
+    modules.append(output_activation)
+
+    mlp = nn.Sequential(*modules)
     # *** END CODE HERE ***
 
     return mlp

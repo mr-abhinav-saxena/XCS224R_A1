@@ -30,6 +30,11 @@ def sample_trajectory(env: Any, policy: Any, max_path_length: int, render: bool=
     ob, info = None, None  # HINT: should be the output of resetting the env
 
     # *** START CODE HERE ***
+    # Reset the environment at the beginning of the trajectory: `env.reset()` returns a tuple of (initial_ob, info_dict).
+    # Assign these values to `ob` and `info`.
+
+    ob, info = env.reset()
+
     # *** END CODE HERE ***
 
     # Initialize data storage for across the trajectory
@@ -50,10 +55,16 @@ def sample_trajectory(env: Any, policy: Any, max_path_length: int, render: bool=
 
         # Use the most recent observation to decide what to do
         obs.append(ob)
-        ac = None # HINT: Query the policy's get_action functio
+        ac = None # HINT: Query the policy's get_action function with the most recent observation `ob` to get the action `ac` that the policy prescribes.
+        
         # *** START CODE HERE ***
+        # Query the policy's action prediction using `policy.get_action(ob)`.
+
+        ac = policy.get_action(ob)
+
         # *** END CODE HERE ***
-        ac = ac[0]
+
+        ac = ac[0] # `get_action` returns a batch of actions. Since we are querying with a single observation, we only want the first (and only) action in that batch. Append this action to `acs`.
         acs.append(ac)
 
         # Take that action and record results
@@ -68,7 +79,12 @@ def sample_trajectory(env: Any, policy: Any, max_path_length: int, render: bool=
         # HINT: rollout can end due to done, or due to max_path_length
 
         rollout_done =  None # HINT: this is either 0 or 1
+        
         # *** START CODE HERE ***
+        # Set `rollout_done` to 1 if the trajectory has finished (i.e. `done` is True or the number
+        # of taken `steps` has reached `max_path_length`). Otherwise, set `rollout_done` to 0.
+
+        rollout_done = 1 if (done or steps >= max_path_length) else 0
         # *** END CODE HERE ***
         
         terminals.append(rollout_done)
@@ -93,6 +109,16 @@ def sample_trajectories(env: Any, policy: Any, min_timesteps_per_batch: int, max
         pass
 
         # *** START CODE HERE ***
+        # 1. Roll out a single rollout path using `sample_trajectory(env, policy, max_path_length, render)`.
+        # 2. Append the returned path dictionary to the `paths` list.
+        # 3. Calculate the number of steps in this rollout using `get_pathlength(path)`.
+        # 4. Increment the running `timesteps_this_batch` count by the path length.
+
+        path = sample_trajectory(env, policy, max_path_length, render)
+        paths.append(path)
+        path_length = get_pathlength(path)
+
+        timesteps_this_batch += path_length
         # *** END CODE HERE ***
 
     return paths, timesteps_this_batch
@@ -107,6 +133,14 @@ def sample_n_trajectories(env: Any, policy: Any, ntraj: int, max_path_length: in
     paths = []
 
     # *** START CODE HERE ***
+    # Loop `ntraj` times to collect trajectories:
+    # - In each iteration, roll out a path using `sample_trajectory(env, policy, max_path_length, render)`.
+    # - Append the path to the `paths` list.
+
+    for _ in range(ntraj):
+        path = sample_trajectory(env, policy, max_path_length, render)
+        paths.append(path)
+
     # *** END CODE HERE ***
 
     return paths
@@ -145,4 +179,4 @@ def convert_listofrollouts(paths: list) -> tuple:
 ############################################
 
 def get_pathlength(path: dict) -> int:
-    return len(path["reward"])
+    return len(path["reward"]) # rewards are collected at each step of a rollout, so the number of rewards in a path dictionary corresponds to the number of steps taken in that rollout

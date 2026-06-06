@@ -211,6 +211,23 @@ class BCTrainer:
         print("\nCollecting data to be used for training...")
 
         # *** START CODE HERE ***
+        # 1. On iteration 0 (i.e. `itr == 0`), check if `load_initial_expertdata` is provided:
+        #    - Load the pre-recorded expert trajectory data using pickle:
+        #      `paths = pickle.load(open(self.params['expert_data'], 'rb'))`.
+        #    - Return `paths`, 'sum(utils.get_pathlength(path))' steps, and `None` for train video paths.
+        # 2. On subsequent iterations, collect data online using the current policy:
+        #    - Call `utils.sample_trajectories()` passing `self.env`, `collect_policy`, the target
+        #      batch size (`self.params['batch_size']`), and the maximum episode steps (`self.params['ep_len']`).
+        #    - Assign the outputs to `paths` and `envsteps_this_batch`.
+
+        if itr == 0 and load_initial_expertdata is not None:
+            paths = pickle.load(open(self.params['expert_data'], 'rb'))
+            #envsteps_this_batch = sum(len(path['reward']) for path in paths)
+            envsteps_this_batch = sum(utils.get_pathlength(path) for path in paths)
+        else:
+            paths, envsteps_this_batch = utils.sample_trajectories(
+                env = self.env, policy = collect_policy, min_timesteps_per_batch = self.params['batch_size'], max_path_length = self.params['ep_len'])
+            
         # *** END CODE HERE ***
 
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
@@ -238,6 +255,10 @@ class BCTrainer:
             ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = None, None, None, None, None
 
             # *** START CODE HERE ***
+            # Query the agent's sampling capability to retrieve a batch of transitions:
+            # `self.agent.sample(self.params['train_batch_size'])`
+
+            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = self.agent.sample(self.params['train_batch_size'])
             # *** END CODE HERE ***
 
             # TODO use the sampled data to train an agent
@@ -247,6 +268,12 @@ class BCTrainer:
             train_log = None
 
             # *** START CODE HERE ***
+            # Update the agent policy network by running training over the sampled transitions:
+            # `train_log = self.agent.train(ob_batch, ac_batch)`.
+            # Append the returned training statistics dictionary `train_log` to `all_logs`.
+
+            train_log = self.agent.train(ob_batch, ac_batch)
+            all_logs.append(train_log)
             # *** END CODE HERE ***
         return all_logs
 
@@ -265,6 +292,16 @@ class BCTrainer:
         # and replace paths[i]["action"] with these expert labels
 
         # *** START CODE HERE ***
+        # 1. Loop through each path trajectory in the `paths` list (i.e. `for i in range(len(paths))`).
+        # 2. Query the expert policy for the correct actions at the exact state observations the agent visited
+        #    during its rollout: `expert_policy.get_action(paths[i]["observation"])`.
+        # 3. Replace the actions recorded by your active agent policy (`paths[i]["action"]`) with these newly
+        #    acquired optimal actions from the expert.
+
+        for i in range(len(paths)):
+            expert_actions = expert_policy.get_action(paths[i]["observation"])
+            paths[i]["action"] = expert_actions
+        
         # *** END CODE HERE ***
 
         return paths
