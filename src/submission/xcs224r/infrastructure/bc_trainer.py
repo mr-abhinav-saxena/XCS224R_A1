@@ -222,8 +222,8 @@ class BCTrainer:
 
         if itr == 0 and load_initial_expertdata is not None:
             paths = pickle.load(open(self.params['expert_data'], 'rb'))
-            #envsteps_this_batch = sum(len(path['reward']) for path in paths)
-            envsteps_this_batch = sum(utils.get_pathlength(path) for path in paths)
+            #envsteps_this_batch = sum(utils.get_pathlength(path) for path in paths)
+            envsteps_this_batch = 0 # Because agent is not actually collecting data from the environment (interacting with environment), we set this to 0 since we are not using any env steps for this data
         else:
             paths, envsteps_this_batch = utils.sample_trajectories(
                 env = self.env, policy = collect_policy, min_timesteps_per_batch = self.params['batch_size'], max_path_length = self.params['ep_len'])
